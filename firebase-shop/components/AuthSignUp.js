@@ -1,7 +1,9 @@
 import React, { useState, useRef, } from "react";
 import StyledFirebaseAuth from "react-firebaseui/StyledFirebaseAuth";
 import firebase, { auth } from "../firebase/clientApp";
-import {createUserWithEmailAndPassword} from "firebase/auth";
+import {sendEmailVerification, createUserWithEmailAndPassword, sendSignInLinkToEmail} from "firebase/auth";
+import useFirebaseAuth from "../firebase/useFirebaseAuth";
+import { getAuth } from "firebase/auth";
 import {
   Card,
   Spacer,
@@ -25,6 +27,9 @@ function SignUpScreen() {
   const closeHandlerError = () => {
     setVisibleError(false);
   };
+  // const auth = useFirebaseAuth();
+  const auth = getAuth();
+  
 
   // Modal for Sign up error
 
@@ -46,20 +51,42 @@ function SignUpScreen() {
     let passwordConfirm = passwordConfirmInputSign.current.value;
 
     var canSign = false;
+    function onEmailSent(result){
+      console.log("email sent", result);
+    }
+    function onEmailNotSent(error){
+      console.log("email not sent", error.message);
+    }
     let re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     function onFulfilled(result) {
       console.log(result);
       console.log("user signed up");
+      const actionCodeSettings = {
+        // URL you want to redirect back to. The domain (www.example.com) for this
+        // URL must be in the authorized domains list in the Firebase Console.
+        url: 'http://localhost:3000/',
+        // This must be true.
+        handleCodeInApp: true,
+      };
+      sendEmailVerification(auth.currentUser, actionCodeSettings).then(onEmailSent, onEmailNotSent);
     }
     function onRejected(error) {
       console.log(error.message);
       setVisibleSignupError(true);
-    }
+    }   
 
     if(password.length> 5 && email.length > 5 && password == passwordConfirm){
       if(re.test(email)){
         console.log("Attempting to login", email, password);
         createUserWithEmailAndPassword(auth, email, password).then(onFulfilled, onRejected); 
+        // const actionCodeSettings = {
+        //   // URL you want to redirect back to. The domain (www.example.com) for this
+        //   // URL must be in the authorized domains list in the Firebase Console.
+        //   url: 'http://localhost:3000/',
+        //   // This must be true.
+        //   handleCodeInApp: true,
+        // };
+        // sendSignInLinkToEmail(auth, email, actionCodeSettings).then(onFulfilled, onRejected); 
       }else{
         setVisibleError(true);
       }

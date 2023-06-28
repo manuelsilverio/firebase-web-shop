@@ -1,21 +1,9 @@
-// import Head from 'next/head'
-// import Image from 'next/image'
+
 import styles from '../styles/Home.module.css'
-// import Navbar from '../components/Navbar'
-// import Footer from '../components/Footer'
-// import Link from 'next/link';
 import React from "react";
 import SignInScreen from "../components/AuthLogin";
-
-// import { initializeApp } from 'firebase/app';
-// import firebase from "../firebase/clientApp";
-// import {auth} from "../firebase/clientApp";
-// import { useAuthState } from "react-firebase-hooks/auth";
-// import { useCollection } from "react-firebase-hooks/firestore";
-// import {signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth"
-// import { useEffect, useState } from 'react';
 import useFirebaseAuth, {signOut} from '../firebase/useFirebaseAuth';
-// import { signOut} from "../firebase/clientApp";
+
 import {
   Card,
   Spacer,
@@ -58,29 +46,51 @@ import {
       </div>
       )
     }else{
-      return(
-        <div>
-          <Container
-        display="flex"
-        alignItems="center"
-        justify="center"
-        css={{ minHeight: '0vh' }}
-      >
-        <Col  align="center" justify="center">
-
-        <h1 className={styles.title}>Authentication homepage</h1>
-        <p className={styles.text}>If you can see this page it means you have authenticated successfully</p>
-
-        <Spacer y={3} />
-        <Button onPress={signOutNow} shadow color="error" auto>Logout</Button>
-        </Col>
-        
-
-      </Container>
-        
-
-      </div>
-      )
+      if(!auth.authUser.emailVerified){
+        console.log("email needs to be verified");
+          return(
+            <div>
+              <Container
+            display="flex"
+            alignItems="center"
+            justify="center"
+            css={{ minHeight: '0vh' }}
+          >
+            <Card variant="bordered" css={{ mw: '420px', p: '20px' }}>
+            <Text  size={24} weight="bold" css={{as: 'center', mb: '20px',}}>Link sent. Email needs to be verified:</Text>
+            <Text  size={18}  css={{as: 'center', mb: '20px',}}>{auth.authUser.email}</Text>
+            </Card>
+           
+          </Container>
+              </div>
+          )
+          
+      }else{
+        return(
+          <div>
+            <Container
+          display="flex"
+          alignItems="center"
+          justify="center"
+          css={{ minHeight: '0vh' }}
+        >
+          <Col  align="center" justify="center">
+  
+          <h1 className={styles.title}>Authentication homepage</h1>
+          <p className={styles.text}>If you can see this page it means you have authenticated successfully</p>
+  
+          <Spacer y={3} />
+          <Button onPress={signOutNow} shadow color="error" auto>Logout</Button>
+          </Col>
+          
+  
+        </Container>
+          
+  
+        </div>
+        )
+      }
+      
     }
 
     

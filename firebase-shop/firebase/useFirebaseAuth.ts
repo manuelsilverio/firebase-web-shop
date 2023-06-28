@@ -4,7 +4,8 @@ import {auth} from "./clientApp";
 
 const formatAuthUser = (user) => ({
   uid: user.uid,
-  email: user.email
+  email: user.email,
+  emailVerified: user.emailVerified
 });
 
 
@@ -26,12 +27,13 @@ export default function useFirebaseAuth() {
     }
 
     setLoading(true)
-    // var formattedUser = formatAuthUser(authState);
-    setAuthUser(authState);    
+    var formattedUser = formatAuthUser(authState);
+    setAuthUser(formattedUser);    
     setLoading(false);
   };
 
   const signOut = () => auth.signOut().then(clear);
+
 
 // listen for Firebase state change
   useEffect(() => {
