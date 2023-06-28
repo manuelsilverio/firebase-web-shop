@@ -5,7 +5,7 @@ import styles from '../styles/Home.module.css'
 // import Footer from '../components/Footer'
 // import Link from 'next/link';
 import React from "react";
-import Auth from "../components/Auth";
+import SignInScreen from "../components/AuthLogin";
 
 // import { initializeApp } from 'firebase/app';
 // import firebase from "../firebase/clientApp";
@@ -14,9 +14,8 @@ import Auth from "../components/Auth";
 // import { useCollection } from "react-firebase-hooks/firestore";
 // import {signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth"
 // import { useEffect, useState } from 'react';
-import useFirebaseAuth from '../firebase/useFirebaseAuth';
-import {signOut} from "firebase/auth";
-// import { auth } from "../firebase/clientApp";
+import useFirebaseAuth, {signOut} from '../firebase/useFirebaseAuth';
+// import { signOut} from "../firebase/clientApp";
 import {
   Card,
   Spacer,
@@ -42,16 +41,20 @@ import {
       console.log(result);
     }
 
-    function signoutNow(){
-      // signOut(auth)
-      // auth.signOut().then(onFulfilled);
-      auth.authUser.signOut();
+    function onRejected(error) {
+      console.log("sign out rejected");
+      console.log(error.message);
+    }
+
+    function signOutNow(){
+       auth.signOut().then(onFulfilled, onRejected);
+       console.log("trying to sign out");
     }
 
     if(!auth.authUser){
       return(
         <div>
-        <Auth/>
+        <SignInScreen title={"Login to see products"}/>
       </div>
       )
     }else{
@@ -69,7 +72,7 @@ import {
         <p className={styles.text}>If you can see this page it means you have authenticated successfully</p>
 
         <Spacer y={3} />
-        <Button onPress={signoutNow} shadow color="error" auto>Logout</Button>
+        <Button onPress={signOutNow} shadow color="error" auto>Logout</Button>
         </Col>
         
 

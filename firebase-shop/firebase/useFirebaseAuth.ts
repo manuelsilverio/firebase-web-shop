@@ -1,3 +1,4 @@
+// Here we create all the hooks for signing in and out the user. Also for retreiving the current user.
 import { useState, useEffect } from 'react'
 import {auth} from "./clientApp";
 
@@ -12,6 +13,11 @@ export default function useFirebaseAuth() {
   const [authUser, setAuthUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const clear = () => {
+    setAuthUser(null);
+    setLoading(true);
+  };
+
   const authStateChanged = async (authState) => {
     if (!authState) {
       setAuthUser(null)
@@ -20,10 +26,12 @@ export default function useFirebaseAuth() {
     }
 
     setLoading(true)
-    var formattedUser = formatAuthUser(authState);
-    setAuthUser(formattedUser);    
+    // var formattedUser = formatAuthUser(authState);
+    setAuthUser(authState);    
     setLoading(false);
   };
+
+  const signOut = () => auth.signOut().then(clear);
 
 // listen for Firebase state change
   useEffect(() => {
@@ -33,6 +41,7 @@ export default function useFirebaseAuth() {
 
   return {
     authUser,
-    loading
+    loading,
+    signOut
   };
 }

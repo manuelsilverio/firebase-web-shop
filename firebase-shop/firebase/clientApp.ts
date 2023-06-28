@@ -1,5 +1,6 @@
+// We use this object to Initialize Firebase app and retrieving the authentication object (auth)
 import {initializeApp, getApps, getApp, FirebaseApp} from "firebase/app";
-import {getAuth} from "firebase/auth";
+import {getAuth, signOut} from "firebase/auth";
 // import {getFirestore} from "firebase/firestore";
 // import { useAuthState } from "react-firebase-hooks/auth";
 // import firebase from "firebase/compat/app";

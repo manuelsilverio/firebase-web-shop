@@ -16,7 +16,7 @@ import {
 
 
 
-function SignInScreen() {
+function SignInScreen({title}) {
 
   // Modal for error message
 
@@ -149,7 +149,7 @@ function SignInScreen() {
               mb: '20px',
             }}
           >
-            Login
+            {title}
           </Text>
           <Input
             ref={emailInput}
