@@ -14,17 +14,17 @@ https://fir-shop-pipeline.web.app/
 
 ### Installation
 
-1- Use ../firebase-shop/ as your main directory. ``` bash cd firebase-shop``` on Windows.
-2- Install dependencies. Use ``` bash npm i  ```
+1- Use ../firebase-shop/ as your main directory. ```cd firebase-shop``` on Windows.
+2- Install dependencies. Use ``` npm i  ```
 3- Then create a file named .env.local and add the variables required for Firebase.
-4- run project using ``` bash npm run dev```
+4- run project using ```npm run dev```
 
 
 ### Deploying website using Firebase hosting
 
 -  Documentation: https://firebase.google.com/docs/hosting/frameworks/nextjs
 
-When running ```bash firebase init ``` is meant to detect that we are running a nextjs project and offer the right installation
+When running ``` firebase init ``` is meant to detect that we are running a nextjs project and offer the right installation
 
 ```bash
 cd firebase-shop
