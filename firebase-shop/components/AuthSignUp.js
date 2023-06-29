@@ -22,6 +22,7 @@ function SignUpScreen() {
 // Modal for error message
 
   const [visibleError, setVisibleError] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState("Wrong Email or Password");
   const handlerError = () => setVisibleError(true);
 
   const closeHandlerError = () => {
@@ -64,10 +65,11 @@ function SignUpScreen() {
       const actionCodeSettings = {
         // URL you want to redirect back to. The domain (www.example.com) for this
         // URL must be in the authorized domains list in the Firebase Console.
-        url: 'http://localhost:3000/',
+        url: process.env.NEXT_PUBLIC_HOME_URL,
         // This must be true.
         handleCodeInApp: true,
       };
+      
       sendEmailVerification(auth.currentUser, actionCodeSettings).then(onEmailSent, onEmailNotSent);
     }
     function onRejected(error) {
@@ -75,26 +77,28 @@ function SignUpScreen() {
       setVisibleSignupError(true);
     }   
 
-    if(password.length> 5 && email.length > 5 && password == passwordConfirm){
-      if(re.test(email)){
+    if(password.length> 5 && email.length > 5){
+      if(password != passwordConfirm){
+        setErrorMessage("The password has to be the same on both fields");
+        setVisibleError(true);
+      }else if(re.test(email)){
         console.log("Attempting to login", email, password);
         createUserWithEmailAndPassword(auth, email, password).then(onFulfilled, onRejected); 
-        // const actionCodeSettings = {
-        //   // URL you want to redirect back to. The domain (www.example.com) for this
-        //   // URL must be in the authorized domains list in the Firebase Console.
-        //   url: 'http://localhost:3000/',
-        //   // This must be true.
-        //   handleCodeInApp: true,
-        // };
-        // sendSignInLinkToEmail(auth, email, actionCodeSettings).then(onFulfilled, onRejected); 
       }else{
+        setErrorMessage("Wrong email address");
         setVisibleError(true);
       }
     }else{
+      setErrorMessage("Worng user/password length");
       setVisibleError(true);
     }
   }
 
+  function keyPressed(e){
+    if(e.keyCode == 13){
+      signup();
+    }
+  }
 
 
 
@@ -107,7 +111,7 @@ function SignUpScreen() {
        onClose={closeHandlerError}>
       <Modal.Header>
           <Text id="modal-title" size={18}>
-            Wrong Email or Password
+            {errorMessage}
           </Text>
         </Modal.Header>
         <Modal.Footer>
@@ -178,6 +182,7 @@ function SignUpScreen() {
            size="lg"
            type="password"
            placeholder="Confirm Password"
+           onKeyDown={keyPressed}
          />
           <Row justify="space-between" css={{ marginTop: '30px' }}>
             <Checkbox >

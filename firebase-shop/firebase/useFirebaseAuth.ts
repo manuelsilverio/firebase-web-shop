@@ -5,7 +5,8 @@ import {auth} from "./clientApp";
 const formatAuthUser = (user) => ({
   uid: user.uid,
   email: user.email,
-  emailVerified: user.emailVerified
+  emailVerified: user.emailVerified,
+  currentUser: user
 });
 
 
@@ -33,6 +34,7 @@ export default function useFirebaseAuth() {
   };
 
   const signOut = () => auth.signOut().then(clear);
+  const deleteUser = () => auth.currentUser?.delete();
 
 
 // listen for Firebase state change
@@ -44,6 +46,6 @@ export default function useFirebaseAuth() {
   return {
     authUser,
     loading,
-    signOut
+    signOut, deleteUser
   };
 }
