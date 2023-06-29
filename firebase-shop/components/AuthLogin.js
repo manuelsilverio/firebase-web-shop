@@ -2,7 +2,9 @@ import React, { useState, useRef, } from "react";
 import StyledFirebaseAuth from "react-firebaseui/StyledFirebaseAuth";
 import firebase, { auth } from "../firebase/clientApp";
 import SignUpScreen from "./AuthSignUp";
+import ForgotPass from "./AuthForgotPass";
 import {signInWithEmailAndPassword} from "firebase/auth";
+import useFirebaseAuth from "../firebase/useFirebaseAuth";
 import {
   Card,
   Spacer,
@@ -17,8 +19,16 @@ import {
 
 
 function SignInScreen({title}) {
+  // Modal activation for forgot password
+  const [visiblePass, setVisiblePass] = React.useState(false);
+  const handlerPass = () => setVisiblePass(true);
 
-  // Modal for error message
+  const closeHandlerPass = () => {
+    setVisiblePass(false);
+  };
+
+
+  // Modal activation for error message
 
   const [visible, setVisible] = React.useState(false);
   const handler = () => setVisible(true);
@@ -27,7 +37,7 @@ function SignInScreen({title}) {
     setVisible(false);
   };
 
-  // Modal for Login error
+  // Modal activation for Login error
 
   const [visibleLoginError, setVisibleLoginError] = React.useState(false);
   const handlerLoginError = () => setVisibleLoginError(true);
@@ -36,7 +46,7 @@ function SignInScreen({title}) {
     setVisibleLoginError(false);
   };
 
-  // Modal for Sign up
+  // Modal activation for Sign up
   const [visibleSignup, setVisibleSignup] = React.useState(false);
   const handlerSignup = () => setVisibleSignup(true);
 
@@ -55,6 +65,7 @@ function SignInScreen({title}) {
     let re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     function onFulfilled(result) {
       console.log(result);
+
       // Success will be printed
     }
     function onRejected(error) {
@@ -79,11 +90,36 @@ function SignInScreen({title}) {
     setVisibleSignup(true);
   }
 
+  function forgotPass(){
+    console.log("Forgot password");
+    setVisiblePass(true);
+  }
   
+  function keyPressed(e){
+    if(e.keyCode == 13){
+      login();
+    }
+  }
 
 
   return (
     <div>
+
+      <Modal
+        noPadding 
+        closeButton
+        aria-labelledby="modal-title"
+        open={visiblePass}
+        onClose={closeHandlerPass}>
+        <Modal.Body>
+          <ForgotPass/>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button auto flat color="warning" onPress={closeHandlerPass}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       <Modal
       noPadding 
@@ -169,12 +205,13 @@ function SignInScreen({title}) {
             size="lg"
             type="password"
             placeholder="Password"
+            onKeyDown={keyPressed}
           />
           <Row justify="space-between" css={{ marginTop: '30px' }}>
-            <Checkbox >
+            <Checkbox css={{ marginTop: '10px' }} >
               <Text size={14}>Remember me</Text>
             </Checkbox>
-            <Text size={14} >Forgot password?</Text>
+            <Button light color="primary" auto onClick={forgotPass}>Forgot password?</Button>
           </Row>
           <Spacer y={1} />
           <Button onPress={login}>Sign in</Button>

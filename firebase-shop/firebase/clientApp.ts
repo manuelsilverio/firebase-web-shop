@@ -24,4 +24,5 @@ const firebaseConfig = {
   console.log("app is initialising");
 
   export const auth = getAuth(app);
+  // auth.settings.appVerificationDisabledForTesting = true;
   export default app;

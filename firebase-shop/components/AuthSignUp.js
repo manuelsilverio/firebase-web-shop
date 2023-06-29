@@ -1,7 +1,9 @@
 import React, { useState, useRef, } from "react";
 import StyledFirebaseAuth from "react-firebaseui/StyledFirebaseAuth";
 import firebase, { auth } from "../firebase/clientApp";
-import {createUserWithEmailAndPassword} from "firebase/auth";
+import {sendEmailVerification, createUserWithEmailAndPassword, sendSignInLinkToEmail} from "firebase/auth";
+import useFirebaseAuth from "../firebase/useFirebaseAuth";
+import { getAuth } from "firebase/auth";
 import {
   Card,
   Spacer,
@@ -20,11 +22,15 @@ function SignUpScreen() {
 // Modal for error message
 
   const [visibleError, setVisibleError] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState("Wrong Email or Password");
   const handlerError = () => setVisibleError(true);
 
   const closeHandlerError = () => {
     setVisibleError(false);
   };
+  // const auth = useFirebaseAuth();
+  const auth = getAuth();
+  
 
   // Modal for Sign up error
 
@@ -46,28 +52,53 @@ function SignUpScreen() {
     let passwordConfirm = passwordConfirmInputSign.current.value;
 
     var canSign = false;
+    function onEmailSent(result){
+      console.log("email sent", result);
+    }
+    function onEmailNotSent(error){
+      console.log("email not sent", error.message);
+    }
     let re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     function onFulfilled(result) {
       console.log(result);
       console.log("user signed up");
+      const actionCodeSettings = {
+        // URL you want to redirect back to. The domain (www.example.com) for this
+        // URL must be in the authorized domains list in the Firebase Console.
+        url: process.env.NEXT_PUBLIC_HOME_URL,
+        // This must be true.
+        handleCodeInApp: true,
+      };
+      
+      sendEmailVerification(auth.currentUser, actionCodeSettings).then(onEmailSent, onEmailNotSent);
     }
     function onRejected(error) {
       console.log(error.message);
       setVisibleSignupError(true);
-    }
+    }   
 
-    if(password.length> 5 && email.length > 5 && password == passwordConfirm){
-      if(re.test(email)){
+    if(password.length> 5 && email.length > 5){
+      if(password != passwordConfirm){
+        setErrorMessage("The password has to be the same on both fields");
+        setVisibleError(true);
+      }else if(re.test(email)){
         console.log("Attempting to login", email, password);
         createUserWithEmailAndPassword(auth, email, password).then(onFulfilled, onRejected); 
       }else{
+        setErrorMessage("Wrong email address");
         setVisibleError(true);
       }
     }else{
+      setErrorMessage("Worng user/password length");
       setVisibleError(true);
     }
   }
 
+  function keyPressed(e){
+    if(e.keyCode == 13){
+      signup();
+    }
+  }
 
 
 
@@ -80,7 +111,7 @@ function SignUpScreen() {
        onClose={closeHandlerError}>
       <Modal.Header>
           <Text id="modal-title" size={18}>
-            Wrong Email or Password
+            {errorMessage}
           </Text>
         </Modal.Header>
         <Modal.Footer>
@@ -151,6 +182,7 @@ function SignUpScreen() {
            size="lg"
            type="password"
            placeholder="Confirm Password"
+           onKeyDown={keyPressed}
          />
           <Row justify="space-between" css={{ marginTop: '30px' }}>
             <Checkbox >
