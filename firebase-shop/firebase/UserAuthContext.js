@@ -18,7 +18,7 @@ export function UserAuthContextProvider({children}){
     function signUp(email, password) {
       return createUserWithEmailAndPassword(auth, email, password);
     }
-    const signOut = () => auth.signOut().then(clear);
+    const signOut = () => auth.signOut();
     const deleteUser = () => auth.currentUser?.delete();
   
     useEffect(() => {
