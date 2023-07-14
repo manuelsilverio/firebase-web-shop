@@ -104,7 +104,8 @@ import {
       const orderItem = {
         user_id: user.uid, 
         id: order_id.toString(), 
-        item_name: selectedItem.title, 
+        title: selectedItem.title, 
+        img: selectedItem.img,
         price: selectedItem.price, 
         price_cents: selectedItem.price_cents, 
         order_tstamp: new Date()

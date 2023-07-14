@@ -36,14 +36,19 @@ export default function Orders() {
     
   // console.log("user data", auth.authUser);
   async function getOrders(){
-    const db = getFirestore();
-    // console.log("user id: ", user.uid);
-    const q = query(collection(db, "orders"), where("user_id", "==", user.uid), orderBy("order_tstamp", "desc"));
-    const querySnapshot = await getDocs(q);
     var result = []
-    querySnapshot.forEach((doc) => {
-      result.push(doc.data)
-    });
+    if(user){
+      if(user.uid != null){
+        const db = getFirestore();
+        // console.log("user id: ", user.uid);
+        const q = query(collection(db, "orders"), where("user_id", "==", user.uid), orderBy("order_tstamp", "desc"));
+        const querySnapshot = await getDocs(q);
+        
+        querySnapshot.forEach((doc) => {
+          result.push(doc.data())
+        });
+      }
+    }    
     return result;
   }
 
@@ -177,7 +182,7 @@ export default function Orders() {
 
         <Grid.Container gap={2} justify="center">
             {orders.map((item, index) => (
-              <Grid xs={6} sm={3} key={index}>
+              <Grid xs={6} sm={4} key={index}>
                 <Card isPressable onClick={() => clickFruit(item)}>
                   <Card.Body css={{ p: 0 }}>
                     <Card.Image
@@ -188,13 +193,16 @@ export default function Orders() {
                       alt={item.title}
                     />
                   </Card.Body>
-                  <Card.Footer css={{ justifyItems: "flex-start" }}>
+                  <Card.Footer css={{justifyItems: "flex-start"}}>
+                    <Col>
                     <Row wrap="wrap" justify="space-between" align="center">
                       <Text b>{item.title}</Text>
                       <Text css={{ color: "$accents7", fontWeight: "$semibold", fontSize: "$sm" }}>
                         {item.price}
                       </Text>
                     </Row>
+                    <Text b size={'$sm'}> Ordered on {item.order_tstamp.toDate().toDateString()} at {item.order_tstamp.toDate().toLocaleTimeString()}</Text>
+                    </Col>
                   </Card.Footer>
                 </Card>
               </Grid>
