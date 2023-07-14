@@ -16,13 +16,9 @@ const firebaseConfig = {
     measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
   };
  
-  
-  // if(!getApps().length){
-    
-  // }
+
   const app = initializeApp(firebaseConfig);
   console.log("app is initialising");
-
   export const auth = getAuth(app);
   // auth.settings.appVerificationDisabledForTesting = true;
   export default app;

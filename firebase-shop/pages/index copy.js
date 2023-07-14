@@ -68,8 +68,7 @@ import {
     const passwordInput = useRef();
 
     // const auth = useFirebaseAuth();
-    const {user, logIn, signOut, signUp, deleteUser} = useUserAuth();
-    
+    const {user} = useUserAuth();
 
     function onFulfilled(result) {
       console.log(result);
@@ -81,7 +80,7 @@ import {
     }
 
     function signOutNow(){
-       logOut.then(onFulfilled, onRejected);
+       auth.signOut().then(onFulfilled, onRejected);
        console.log("trying to sign out");
     }
 
@@ -102,10 +101,9 @@ import {
       const order_id = uuid()
       const orderRef = doc(db, "orders", order_id.toString())
       const orderItem = {
-        user_id: user.uid, 
+        user_id: auth.authUser.uid, 
         id: order_id.toString(), 
-        title: selectedItem.title, 
-        img: selectedItem.img,
+        item_name: selectedItem.title, 
         price: selectedItem.price, 
         price_cents: selectedItem.price_cents, 
         order_tstamp: new Date()
@@ -115,7 +113,7 @@ import {
     }
 
     async function finaliseAccountDeletion(){
-      let email = user.email;
+      let email = auth.authUser.email;
       let password = passwordInput.current.value;
       try{
         const credential = EmailAuthProvider.credential(
@@ -124,11 +122,11 @@ import {
         );
         console.log("credentials fetched", credential);
         const result = await reauthenticateWithCredential(
-            user.currentUser, 
+            auth.authUser.currentUser, 
             credential
         ).then((result)=>{
             console.log(" user reauthenticated: ", result);
-            deleteUser().then((result)=>{
+            auth.deleteUser().then((result)=>{
               console.log("User deleted: ", result);
             }).catch((error)=>{
               console.log("error with user deletion: ", error.message);
@@ -147,14 +145,14 @@ import {
       
     }
 
-    if(!user){
+    if(!auth.authUser){
       return(
         <div>
         <SignInScreen title={"Login to see products"}/>
       </div>
       )
     }else{
-      if(!user.emailVerified){
+      if(!auth.authUser.emailVerified){
         console.log("email needs to be verified");
           return(
             <div>
@@ -166,7 +164,7 @@ import {
           >
             <Card variant="bordered" css={{ mw: '580px', p: '20px' }}>
             <Text  size={24} weight="bold" css={{as: 'center', mb: '20px',}}>Homepage. Link sent. Email needs to be verified:</Text>
-            <Text  size={18}  css={{as: 'center', mb: '20px',}}>{user.email}</Text>
+            <Text  size={18}  css={{as: 'center', mb: '20px',}}>{auth.authUser.email}</Text>
             </Card>
            
           </Container>

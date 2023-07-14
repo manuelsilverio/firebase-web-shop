@@ -2,13 +2,14 @@ import styles from '../styles/Home.module.css'
 import Navbar from '../components/Navbar'
 import Footer
  from '../components/Footer'
- import useFirebaseAuth, {signOut} from '../firebase/useFirebaseAuth';
+ import { useUserAuth } from '../firebase/UserAuthContext';
+ import { getFirestore, doc, getDocs, query, where, collection, orderBy } from '@firebase/firestore';
  import SignInScreen from "../components/AuthLogin";
  import React, {useRef} from "react";
- import {EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
+ import {EmailAuthProvider, reauthenticateWithCredential, getAuth } from 'firebase/auth';
 
  import {
-  Card,
+  Card, Grid,
   Spacer,
   Button,
   Text,
@@ -20,16 +21,40 @@ import Footer
 
 export default function Orders() {
 
-  const auth = useFirebaseAuth();
+  const {user, logIn, signOut, signUp, deleteUser} = useUserAuth();
 
   const [visibleDeleteAccount, setVisibleDeleteAccount] = React.useState(false);
-    const handlerDeleteAccount = () => setVisibleDeleteAccount(false);
+  const [orders, setOrders] = React.useState([]);
+  const handlerDeleteAccount = () => setVisibleDeleteAccount(false);
 
-    const closeHandlerDeleteAccount = () => {
-      setVisibleDeleteAccount(false);
-    };
+  const closeHandlerDeleteAccount = () => {
+    setVisibleDeleteAccount(false);
+  };
 
-    const passwordInput = useRef();
+  const passwordInput = useRef();
+
+    
+  // console.log("user data", auth.authUser);
+  async function getOrders(){
+    var result = []
+    if(user){
+      if(user.uid != null){
+        const db = getFirestore();
+        // console.log("user id: ", user.uid);
+        const q = query(collection(db, "orders"), where("user_id", "==", user.uid), orderBy("order_tstamp", "desc"));
+        const querySnapshot = await getDocs(q);
+        
+        querySnapshot.forEach((doc) => {
+          result.push(doc.data())
+        });
+      }
+    }    
+    return result;
+  }
+
+  getOrders().then((result)=>{
+    setOrders(result)
+  });
 
   function onFulfilled(result) {
     console.log(result);
@@ -41,7 +66,7 @@ export default function Orders() {
   }
 
   function signOutNow(){
-      auth.signOut().then(onFulfilled, onRejected);
+      signOut().then(onFulfilled, onRejected);
       console.log("trying to sign out");
   }
 
@@ -50,7 +75,7 @@ export default function Orders() {
   }
 
   async function finaliseAccountDeletion(){
-    let email = auth.authUser.email;
+    let email = user.email;
     let password = passwordInput.current.value;
     try{
       const credential = EmailAuthProvider.credential(
@@ -59,11 +84,11 @@ export default function Orders() {
       );
       console.log("credentials fetched", credential);
       const result = await reauthenticateWithCredential(
-          auth.authUser.currentUser, 
+          user.currentUser, 
           credential
       ).then((result)=>{
           console.log(" user reauthenticated: ", result);
-          auth.deleteUser().then((result)=>{
+          deleteUser().then((result)=>{
             console.log("User deleted: ", result);
           }).catch((error)=>{
             console.log("error with user deletion: ", error.message);
@@ -83,14 +108,14 @@ export default function Orders() {
    
   }
   
-  if(!auth.authUser){
+  if(!user){
     return(
       <div>
       <SignInScreen title={"Login to see past orders"}/>
     </div>
     )
   }else{
-    if(!auth.authUser.emailVerified){
+    if(!user.emailVerified){
       console.log("email needs to be verified");
       return(
         <div>
@@ -102,7 +127,7 @@ export default function Orders() {
       >
         <Card variant="bordered" css={{ mw: '580px', p: '20px' }}>
         <Text  size={24} weight="bold" css={{as: 'center', mb: '20px',}}>Orders. Link sent. Email needs to be verified:</Text>
-        <Text  size={18}  css={{as: 'center', mb: '20px',}}>{auth.authUser.email}</Text>
+        <Text  size={18}  css={{as: 'center', mb: '20px',}}>{user.email}</Text>
         <Button onPress={signOutNow} shadow color="gradient" auto >Logout</Button>
         </Card>
        
@@ -113,7 +138,7 @@ export default function Orders() {
       return(
         <div>
 
-<Modal
+      <Modal
         noPadding 
         closeButton
         aria-labelledby="modal-title"
@@ -151,7 +176,39 @@ export default function Orders() {
         <Col  align="center" justify="center">
   
         <h1 className={styles.title}>Orders</h1>
+        
+     
         <p className={styles.text}>If you can see this page it means you have authenticated successfully</p>
+
+        <Grid.Container gap={2} justify="center">
+            {orders.map((item, index) => (
+              <Grid xs={6} sm={4} key={index}>
+                <Card isPressable onClick={() => clickFruit(item)}>
+                  <Card.Body css={{ p: 0 }}>
+                    <Card.Image
+                      src={"https://nextui.org" + item.img}
+                      objectFit="cover"
+                      width="100%"
+                      height={140}
+                      alt={item.title}
+                    />
+                  </Card.Body>
+                  <Card.Footer css={{justifyItems: "flex-start"}}>
+                    <Col>
+                    <Row wrap="wrap" justify="space-between" align="center">
+                      <Text b>{item.title}</Text>
+                      <Text css={{ color: "$accents7", fontWeight: "$semibold", fontSize: "$sm" }}>
+                        {item.price}
+                      </Text>
+                    </Row>
+                    <Text b size={'$sm'}> Ordered on {item.order_tstamp.toDate().toDateString()} at {item.order_tstamp.toDate().toLocaleTimeString()}</Text>
+                    </Col>
+                  </Card.Footer>
+                </Card>
+              </Grid>
+            ))}
+          </Grid.Container>
+
   
         <Spacer y={3} />
          <Button onPress={signOutNow} shadow color="secondary">Logout</Button>
