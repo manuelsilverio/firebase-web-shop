@@ -2,7 +2,7 @@
 import styles from '../styles/Home.module.css'
 import React, {useRef} from "react";
 import SignInScreen from "../components/AuthLogin";
-import useFirebaseAuth, {signOut, deleteUser} from '../firebase/useFirebaseAuth';
+// import useFirebaseAuth, {signOut, deleteUser} from '../firebase/useFirebaseAuth';
 import { getFirestore, doc, setDoc } from '@firebase/firestore';
 import { useUserAuth } from '../firebase/UserAuthContext';
 // import { auth } from '../firebase/clientApp';
@@ -22,13 +22,7 @@ import {
 
 
   export default function Home() {
-    // const [user, setUser] = useState(null)
-    // const onAuthStateChanged = async (authState)=>{
-    //   if(!authState){
-    //     setUser(authState)
-    //   }
-    // };
-
+    const {user, logIn, signOut, signUp, deleteUser} = useUserAuth();
     const list = [
       {
         title: "Orange",
@@ -66,9 +60,6 @@ import {
     };
 
     const passwordInput = useRef();
-
-    // const auth = useFirebaseAuth();
-    const {user, logIn, signOut, signUp, deleteUser} = useUserAuth();
     
 
     function onFulfilled(result) {
@@ -81,8 +72,8 @@ import {
     }
 
     function signOutNow(){
-       logOut.then(onFulfilled, onRejected);
-       console.log("trying to sign out");
+      signOut().then(onFulfilled, onRejected);
+      console.log("trying to sign out");
     }
 
     function deleteAccount(){
